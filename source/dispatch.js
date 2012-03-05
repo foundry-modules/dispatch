@@ -33,8 +33,9 @@
 
 		// If it's a string, it could be a getter or a setter.
 		if (typeof manifest==="string") {
+
 			manifest = {
-				name: manifest;
+				name: manifest
 			}
 		}
 
@@ -94,7 +95,7 @@
 
 		if (name===undefined) return;
 
-		return disptch.dropsite[name] || dispatch.dropsite[name] = new Dropsite(name);
+		return dispatch.dropsite[name] || (dispatch.dropsite[name] = new Dropsite(name));
 	}
 
 	// Dropsite class
