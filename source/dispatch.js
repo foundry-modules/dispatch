@@ -68,8 +68,21 @@
 	// Dropsite registry
 	dispatch.dropsite = {};
 
+	dispatch.delivering = false;
+
+	dispatch.queue = [];
+
 	// Internal function. Do not use.
-	dispatch.deliver = function(parcel, dropsite) {
+	dispatch.deliver = function(parcel, dropsite, forceDeliver) {
+
+		if (dispatch.delivering) {
+			if (!forceDeliver) {
+				dispatch.queue.push(arguments);
+				return;
+			}
+		}
+
+		dispatch.delivering = true;
 
 		// We will always keep a copy of the parcel
 		// for current or future dropsites.
@@ -87,7 +100,6 @@
 
 			var site = dropsite.sites[i];
 
-			// If parcel has been sent, go to the next dropsite
 			if (parcel.sentTo[site.id]) continue;
 
 			// If dropsite exists
@@ -96,9 +108,18 @@
 				// Deliver parcel
 				site.target.apply(window, [parcel.exports, parcel.manifest]);
 
-				// Mark as sent
-				return parcel.sentTo[site.id] = true;
+				parcel.sentTo[site.id] = true;
 			}
+		}
+
+		if (dispatch.queue.length > 0) {
+
+			var args = dispatch.queue.shift();
+			dispatch.deliver.apply(this, [args[0], args[1], true]);
+
+		} else {
+
+			dispatch.delivering = false;
 		}
 	}
 
@@ -209,7 +230,7 @@
 
 			parcel = this.parcels[i];
 
-			if (parcel.recipient==name) {
+			if (parcel.manifest.recipient==name) {
 
 				this.index = i;
 
@@ -273,9 +294,9 @@
 			// If you're doing intendedFor() just to get the parcel for the
 			// secondary dropsite, you probably need to rethink your logic.
 
-			if (parcel.recipient!==undefined) {
+			if (parcel.manifest.recipient!==undefined) {
 
-				parcel.recipient = name;
+				parcel.manifest.recipient = name;
 			}
 
 			dropsite = dispatch.to(name);
@@ -285,7 +306,7 @@
 		if (typeof dropsite==="function") {
 
 			// Create a dropsite entry first
-			dropsite = dispatch.to(uid("Custom dropsite for: " + parcel.name + "[" + uid() + "]")).at(dropsite);
+			dropsite = dispatch.to("Custom dropsite for " + parcel.manifest.name).at(dropsite);
 		}
 
 		// Keep a copy of the dropsite
@@ -325,10 +346,10 @@
 		this.dropsiteLocked = false;
 
 		var parcel = this.parcels[this.index],
-			dropsites = this.dropsites,
-			i;
+			dropsites = this.dropsites;
 
 		// Go through every parcel and deliver its content
+		var i;
 		for (i=0; i<dropsites.length; i++) {
 
 			var dropsite = dropsites[i];
