@@ -13,7 +13,7 @@
 
 (function(window, undefined) {
 
-	// Prevent any secondary dispatch for overriding existing one.
+	// Prevent any secondary dispatch overriding existing one.
 	if (window.dispatch!==undefined) return;
 
 	var uid = function(p,s) {
