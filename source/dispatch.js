@@ -69,25 +69,37 @@
 	dispatch.dropsite = {};
 
 	// Internal function. Do not use.
-	dispatch.deliver = function(parcel, site) {
+	dispatch.deliver = function(parcel, dropsite) {
 
-		var parcelContainsExports = parcel.exports!==undefined,
-			parcelUnsent = !parcel.sentTo[site.id],
-			dropsiteHasTarget = site.target;
+		// We will always keep a copy of the parcel
+		// for current or future dropsites.
+		dropsite.addParcel(parcel);
 
-		if (parcelContainsExports && parcelUnsent && dropsiteHasTarget) {
-
-			site.target.apply(window, parcel.exports, parcel.manifest);
-
-			return parcel.sentTo[site.id] = true;
+		// If parcel does not contain exports, don't do anything.
+		// When the parcel has exports, it will call for delivery again.
+		if (parcel.exports===undefined) {
+			return;
 		}
 
-		// Push it to the list of parcel that is yet to be sent
-		if (!dropsiteHasTarget) {
-			dropsite.parent.parcels.push(parcel);
-		}
+		// Go through every dropsite
+		var i;
+		for (i=0; i<dropsite.sites.length; i++) {
 
-		return false;
+			var site = dropsite.sites[i];
+
+			// If parcel has been sent, go to the next dropsite
+			if (parcel.sentTo[site.id]) continue;
+
+			// If dropsite exists
+			if (site.target) {
+
+				// Deliver parcel
+				site.target.apply(window, [parcel.exports, parcel.manifest]);
+
+				// Mark as sent
+				return parcel.sentTo[site.id] = true;
+			}
+		}
 	}
 
 	// Getting a dropsite.
@@ -102,7 +114,7 @@
 
 	var Dropsite = function(name) {
 		this.name = name;
-		this.sites = {};
+		this.sites = [];
 		this.parcels = [];
 	};
 
@@ -112,16 +124,17 @@
 
 	Dropsite.prototype.at = function(site) {
 
+		var dropsite = this;
+
 		if (typeof site === "function") {
 
 			var siteId = uid(this.name+"/");
 
 			// Create a new target to the dropsite
-			this.sites[siteId] = {
+			this.sites.push({
 				id: siteId,
-				parent: this,
 				target: site
-			};
+			});
 
 			// Go through every existing parcel for this dropsite,
 			// and drop it at the new target.
@@ -130,11 +143,31 @@
 
 				var parcel = this.parcels[i];
 
-				dispatch.deliver(parcel, site);
+				dispatch.deliver(parcel, dropsite);
 			}
 		}
 
 		return this;
+	}
+
+	Dropsite.prototype.addParcel = function(newParcel) {
+
+		var parcelExists = false;
+
+		var i;
+		for (i=0; i<this.parcels.length; i++) {
+
+			var parcel = this.parcels[i];
+
+			if (parcel == newParcel) {
+				parcelExists = true;
+				break;
+			}
+		}
+
+		if (!parcelExists) {
+			this.parcels.push(newParcel);
+		}
 	}
 
 	// Parcel class
@@ -142,8 +175,8 @@
 	var Parcel = function(manifest) {
 
 		this.name = manifest.name;
-		this.sentTo = {};
 		this.dropsites = [];
+		this.parcels = [];
 
 		// The rest of the operation is done in .add() called manually.
 	}
@@ -152,7 +185,8 @@
 
 		return this.parcels.push({
 			manifest: manifest,
-			exports: exports
+			exports: exports,
+			sentTo: {}
 		});
 	}
 
@@ -171,9 +205,9 @@
 
 		var parcel;
 
-		for (i in parcels) {
+		for (i in this.parcels) {
 
-			parcel = parcels[i];
+			parcel = this.parcels[i];
 
 			if (parcel.recipient==name) {
 
@@ -230,7 +264,21 @@
 
 			// Resolve dropsite
 			var name = dropsite;
-			dropsite = dispatch.to(name);  // .withParcel(parcel);
+
+			// If a recipient has already been registered,
+			// anymore incoming recipient will be assigned
+			// only as a secondary dropsite.
+
+			// intendedFor(secondRecipientName) will not work.
+			// If you're doing intendedFor() just to get the parcel for the
+			// secondary dropsite, you probably need to rethink your logic.
+
+			if (parcel.recipient!==undefined) {
+
+				parcel.recipient = name;
+			}
+
+			dropsite = dispatch.to(name);
 		}
 
 		// If a dropsite target is given
@@ -245,16 +293,19 @@
 
 		// If the parcel is locked, don't deliver,
 		// except if being forced.
-		if (this.dropsiteLocked && forceDeliver) {
+		if (this.dropsiteLocked) {
 
 			// Attempt to deliver
-			dispatch.deliver(parcel, dropsite);
+			if (forceDeliver) {
+				dispatch.deliver(parcel, dropsite);
+			}
 
 		} else {
 
 			// This will ensure previous undelivered dropsite
 			// gets delivered first before the current dropsite.
 			this.toAll();
+
 		}
 
 		return this;
