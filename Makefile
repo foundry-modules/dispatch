@@ -1,11 +1,6 @@
+all: copy minify
+
 include ../../build/modules.mk
 
 MODULE = dispatch
-FILENAME = ${MODULE}.js
-SOURCE = ${SOURCE_DIR}/${MODULE}.js
-PRODUCTION = ${PRODUCTION_DIR}/${FILENAME}
-DEVELOPMENT = ${DEVELOPMENT_DIR}/${FILENAME}
-
-all:
-	cp ${SOURCE} ${DEVELOPMENT}
-	${UGLIFYJS} ${DEVELOPMENT} > ${PRODUCTION}
+FILENAME_PREFIX = 
