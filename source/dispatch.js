@@ -49,7 +49,7 @@
 		if (parcel===undefined) {
 
 			// Create the parcel and put it in our registry
-			parcel = dispatch.parcels[manifest.name] = new Parcel(manifest.name);
+			parcel = dispatch.parcels[manifest.name] = new Parcel(manifest);
 
 			// Add a variation of the parcel
 			parcel.add(manifest, exports);
