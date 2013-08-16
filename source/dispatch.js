@@ -297,7 +297,7 @@
 			// If you're doing intendedFor() just to get the parcel for the
 			// secondary dropsite, you probably need to rethink your logic.
 
-			if (parcel.manifest.recipient!==undefined) {
+			if (parcel.manifest.recipient===undefined) {
 
 				parcel.manifest.recipient = name;
 			}
@@ -356,6 +356,11 @@
 		for (i=0; i<dropsites.length; i++) {
 
 			var dropsite = dropsites[i];
+
+			if (dropsite.name==parcel.manifest.recipient ||
+				dropsite.name.match("Custom dropsite for ")) {
+				dispatch.deliver(parcel, dropsite);
+			}			
 
 			dispatch.deliver(parcel, dropsite);
 		}
