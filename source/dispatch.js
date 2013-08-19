@@ -14,13 +14,13 @@
 (function(window, undefined) {
 
 	// Prevent any secondary dispatch overriding existing one.
-	if (window.dispatch!==undefined) return;
+	if (window.Dispatch!==undefined) return;
 
 	var uid = function(p,s) {
 		return ((p) ? p : '') + Math.random().toString().replace('.','') + ((s) ? s : '');
 	}
 
-	var dispatch = window.dispatch = function(manifest, exports) {
+	var dispatch = window.Dispatch = function(manifest, exports) {
 
 		var setter = false;
 
