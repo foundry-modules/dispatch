@@ -321,7 +321,7 @@
 
 			// Attempt to deliver
 			if (forceDeliver) {
-				dispatch.deliver(parcel, dropsite);
+				dispatch.deliver(parcel, dropsite, forceDeliver);
 			}
 
 		} else {
