@@ -108,6 +108,8 @@
 			// If dropsite exists
 			if (site.target) {
 
+				if (parcel.parent.dropsiteLocked && !site.id.match(parcel.parent.dropsiteLockTarget)) return;
+
 				// Deliver parcel
 				site.target.apply(window, [parcel.exports, parcel.manifest]);
 
@@ -210,7 +212,8 @@
 		return this.parcels.push({
 			manifest: manifest,
 			exports: exports,
-			sentTo: {}
+			sentTo: {},
+			parent: this
 		});
 	}
 
@@ -339,6 +342,8 @@
 
 		this.dropsiteLocked = true;
 
+		this.dropsiteLockTarget = dropsite;
+
 		this.to(dropsite, true);
 
 		return this;
@@ -347,6 +352,8 @@
 	Parcel.prototype.toAll = function() {
 
 		this.dropsiteLocked = false;
+
+		delete this.dropsiteLockTarget;
 
 		var parcel = this.parcels[this.index],
 			dropsites = this.dropsites;
