@@ -10,9 +10,9 @@ var enqueue = function(fn) {
 		instance.execute = function(){
 			if (working) return;
 			working = 1; locked = 0;
-			var q; while(q = queue.shift()) fn.apply(q[0], q[1]);
+			var q; while(q = queue.shift()) { fn.apply(q[0], q[1]) };
 			working = 0;
-		},
+		};
 		instance.lock = function(){
 			locked = 0;
 		};
@@ -49,7 +49,7 @@ var self = window[ns] = {
 	}),
 
 	module: enqueue(function(name, factory) {
-		factory.apply(self, [$]);
+		$.module(name, factory);
 	}),
 
 	installer: function(recipient, name, factory) {
@@ -94,7 +94,7 @@ var self = window[ns] = {
 			},
 			abstractChain = function(name, methods) {
 				return function(){
-					var chain = [abstractQueue(name, this, arguments)],
+					var chain = [abstractQueue(name, this, arguments)];
 						queue.push(chain);
 					return abstractInstance({}, methods, chain);
 				};
