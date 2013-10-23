@@ -2,7 +2,7 @@
 
 // Enqueue class
 var enqueue = function(fn) {
-	var queue = [], locked = 1, working = 1, fn = fn,
+	var queue = [], locked = 1, working = 0, fn = fn,
 		instance = function(){
 			queue.push([this, arguments]);
 			if (!locked) instance.execute();
@@ -103,13 +103,13 @@ var self = window[ns] = {
 				var component = components[name], i = 0;
 				for (; i < queue.length; i++) {
 					var fn = queue[i];
-					if (typeof fn==="object") {
-						component[fn.method].apply(component, fn.args)
-					} else {
+					if (Object.prototype.toString.call(fn)==='[object Array]') {
 						var chain = fn, context = component, j = 0;
 						for (; j < chain.length; j++) {
 							context = context[chain[j].method].apply(context, chain[j].args);
-						}
+						}						
+					} else {
+						component[fn.method].apply(component, fn.args)
 					}
 				}
 			};			
@@ -121,7 +121,7 @@ var self = window[ns] = {
 				);
 
 				// Set reference to options & queue	
-				component.name = name;
+				component.className = name;
 				component.options = options;
 				component.queue = queue;
 
@@ -131,7 +131,7 @@ var self = window[ns] = {
 					["library","script","stylesheet","language","template","view","done","always","fail","progress"]
 				);
 
-		return self.components[name] = component;
+		return window[name] = components[name] = component;
 	}
 };
 
