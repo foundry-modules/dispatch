@@ -53,10 +53,10 @@ var self = window[ns] = {
 	}),
 
 	installer: function(recipient, name, factory) {
+		if (!installers[recipient]) installers[recipient] = []; // Create package array if this is the first time
 		if (!name) return installers[recipient];
 		var component = components[recipient]; // Get component
 		if (component.registered) return component.install(name, factory); // If component exist, install straight away
-		if (!installers[recipient]) installers[recipient] = []; // Create package array if this is the first time
 		installers[recipient].push([name, factory]); // Keep the package to install later
 	},
 
