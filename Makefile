@@ -2,5 +2,5 @@ all: copy-script minify-script
 
 include ../../build/modules.mk
 
-MODULE = dispatch
+MODULE = bootloader
 SOURCE_SCRIPT_FILE_PREFIX = 
