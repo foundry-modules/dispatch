@@ -1,4 +1,4 @@
-all: copy-script minify-script
+all: resolve-namespace minify-script
 
 include ../../build/modules.mk
 

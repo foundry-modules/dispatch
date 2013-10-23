@@ -135,4 +135,4 @@ var self = window[ns] = {
 	}
 };
 
-})($FOUNDRY_BOOTLOADER);
+})("$FOUNDRY_BOOTLOADER");
