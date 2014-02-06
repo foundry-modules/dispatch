@@ -107,12 +107,12 @@ var self = window[ns] = {
 						var chain = fn, context = component, j = 0;
 						for (; j < chain.length; j++) {
 							context = context[chain[j].method].apply(context, chain[j].args);
-						}						
+						}
 					} else {
 						component[fn.method].apply(component, fn.args)
 					}
 				}
-			};			
+			};
 
 			// Create abstract component
 			var component = abstractInstance(
@@ -120,7 +120,7 @@ var self = window[ns] = {
 					["run","ready","module","template"]
 				);
 
-				// Set reference to options & queue	
+				// Set reference to options & queue
 				component.className = name;
 				component.options = options;
 				component.queue = queue;
@@ -128,7 +128,7 @@ var self = window[ns] = {
 				// Create abstract require method
 				component.require = abstractChain(
 					"require",
-					["library","script","stylesheet","language","template","view","done","always","fail","progress"]
+					["library","script","stylesheet","language","template","app","view","done","always","fail","progress"]
 				);
 
 		return window[name] = components[name] = component;
