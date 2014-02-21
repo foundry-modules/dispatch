@@ -117,7 +117,7 @@ var self = window[ns] = {
 			// Create abstract component
 			var component = abstractInstance(
 					function(){component.run.apply(this.arguments)},
-					["run","ready","module","template"]
+					["run","ready","module","template","dialog"]
 				);
 
 				// Set reference to options & queue
