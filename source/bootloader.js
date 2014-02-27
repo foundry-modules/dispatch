@@ -117,7 +117,7 @@ var self = window[ns] = {
 			// Create abstract component
 			var component = abstractInstance(
 					function(){component.run.apply(this.arguments)},
-					["run","ready","module","template"]
+					["run","ready","module","template","dialog"]
 				);
 
 				// Set reference to options & queue
@@ -128,7 +128,7 @@ var self = window[ns] = {
 				// Create abstract require method
 				component.require = abstractChain(
 					"require",
-					["library","script","stylesheet","language","template","view","done","always","fail","progress"]
+					["library","script","stylesheet","language","template","app","view","done","always","fail","progress"]
 				);
 
 		// Register component in global namespace
