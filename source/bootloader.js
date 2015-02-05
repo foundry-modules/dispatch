@@ -20,16 +20,9 @@ var enqueue = function(fn) {
 };
 
 // Private variables
-var $, options, components = {}, initialized = 0, installers = [];
+var $, components = {}, initialized = 0, installers = [];
 
 var self = window[ns] = {
-
-	setup: function(o) {
-		options = o; // Keep a copy of the options
-		self.init(); // Try to initialize.
-
-		// Read from the meta here
-	},
 
 	jquery: function(jquery) {
 		if ($) return; // If jquery is already available, stop.
@@ -88,15 +81,28 @@ var self = window[ns] = {
 				}
 			});
 
-			FD50.setup(foundryOptions);
-
 		});
 
-		if ($ && options) { // If options & jquery is available,
-			self.$ = $.initialize(options); // Initialize jquery
-			self.plugin.execute(); // Execute any pending plugins
-			initialized = 1;
+		// Only proceed to register the components when both foundry options and jquery is available.
+		if ($ && foundryOptions) { 
+			// Initialize jquery
+			self.$ = $.initialize(foundryOptions); 
+
+			// Execute any pending plugins
+			self.plugin.execute(); 
+
+			// Get all abstract components
+			$.each(components, function(i, component){
+
+			    // If this component is registered, stop.
+			    if (component.registered) return;
+
+			    // Create an instance of the component
+			    $.Component.register(component);
+			});
 		}
+
+		initialized = 1;
 	},
 
 	plugin: enqueue(function(name, factory) {
