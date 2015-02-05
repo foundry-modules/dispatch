@@ -16,6 +16,9 @@ var enqueue = function(fn) {
 		instance.lock = function(){
 			locked = 0;
 		};
+
+		instance.queue = queue;
+
 	return instance;
 };
 
@@ -34,29 +37,6 @@ var self = window[ns] = {
 		if (initialized) return; // If initialized, stop.
 
 		$(document).ready(function(){
-
-			$.each(components, function(key, component) {
-				var meta = $('meta[name="%BOOTCODE%:' + key + '"]');
-
-				if (meta.length < 1) {
-					delete window[key];
-					delete components[key];
-					return;
-				}
-
-				// Here is where we neeed to update the component options
-				var value = meta.attr('content').split(',');
-				var props = ["mode", "version", "baseUrl", "cdn", "token"];
-				var componentOptions = {};
-
-
-				$(value).each(function(i, val) {
-					componentOptions[props[i]] = val;
-				});
-
-				// Update component with the proper options
-				component.options = componentOptions;
-			});
 
 			// Read foundry's meta
 			var foundryMeta = $('meta[name="%BOOTCODE%"]').attr('content').split(',');
@@ -80,27 +60,50 @@ var self = window[ns] = {
 					foundryOptions[props[i]] = val;
 				}
 			});
+			
+			$.each(components, function(key, component) {
+				var meta = $('meta[name="%BOOTCODE%:' + key + '"]');
+
+				if (meta.length < 1) {
+					delete window[key];
+					delete components[key];
+					return;
+				}
+
+				// Here is where we neeed to update the component options
+				var value = meta.attr('content').split(',');
+				var props = ["mode", "version", "baseUrl", "cdn", "token"];
+				var componentOptions = {};
+
+
+				$(value).each(function(i, val) {
+					componentOptions[props[i]] = val;
+				});
+
+				// Update component with the proper options
+				component.options = componentOptions;
+			});
+
+			// Only proceed to register the components when both foundry options and jquery is available.
+			if ($ && foundryOptions) { 
+				// Initialize jquery
+				self.$ = $.initialize(foundryOptions); 
+
+				// Execute any pending plugins
+				self.plugin.execute(); 
+
+				// Get all abstract components
+				$.each(components, function(i, component){
+
+				    // If this component is registered, stop.
+				    if (component.registered) return;
+
+				    // Create an instance of the component
+				    $.Component.register(component);
+				});
+			}
 
 		});
-
-		// Only proceed to register the components when both foundry options and jquery is available.
-		if ($ && foundryOptions) { 
-			// Initialize jquery
-			self.$ = $.initialize(foundryOptions); 
-
-			// Execute any pending plugins
-			self.plugin.execute(); 
-
-			// Get all abstract components
-			$.each(components, function(i, component){
-
-			    // If this component is registered, stop.
-			    if (component.registered) return;
-
-			    // Create an instance of the component
-			    $.Component.register(component);
-			});
-		}
 
 		initialized = 1;
 	},
