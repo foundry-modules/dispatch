@@ -27,6 +27,8 @@ var self = window[ns] = {
 	setup: function(o) {
 		options = o; // Keep a copy of the options
 		self.init(); // Try to initialize.
+
+		// Read from the meta here
 	},
 
 	jquery: function(jquery) {
@@ -37,6 +39,59 @@ var self = window[ns] = {
 
 	init: function() {
 		if (initialized) return; // If initialized, stop.
+
+		$(document).ready(function(){
+
+			$.each(components, function(key, component) {
+				var meta = $('meta[name="%BOOTCODE%:' + key + '"]');
+
+				if (meta.length < 1) {
+					delete window[key];
+					delete components[key];
+					return;
+				}
+
+				// Here is where we neeed to update the component options
+				var value = meta.attr('content').split(',');
+				var props = ["mode", "version", "baseUrl", "cdn", "token"];
+				var componentOptions = {};
+
+
+				$(value).each(function(i, val) {
+					componentOptions[props[i]] = val;
+				});
+
+				// Update component with the proper options
+				component.options = componentOptions;
+			});
+
+			// Read foundry's meta
+			var foundryMeta = $('meta[name="%BOOTCODE%"]').attr('content').split(',');
+			var props = ['environment','mode', 'path', 'cdn', 'extension', 'cdnPath', 'rootPath', 'basePath', 'indexUrl', 'joomla.location', 'joomla.version', 'joomla.debug', 'joomla.appendTitle','joomla.sitename', 'locale'];
+			var foundryOptions = {"joomla": {}};
+
+			$(foundryMeta).each(function(i, val) {
+				var key = props[i];
+
+				if (!key) {
+					return;
+				}
+
+				if (key.match(/joomla\.(.*)/)) {
+
+					var match = key.match(/joomla\.(.*)/)[1];
+
+					foundryOptions['joomla'][match] = val;
+
+				} else {
+					foundryOptions[props[i]] = val;
+				}
+			});
+
+			FD50.setup(foundryOptions);
+
+		});
+
 		if ($ && options) { // If options & jquery is available,
 			self.$ = $.initialize(options); // Initialize jquery
 			self.plugin.execute(); // Execute any pending plugins
@@ -116,7 +171,9 @@ var self = window[ns] = {
 
 			// Create abstract component
 			var component = abstractInstance(
-					function(){component.run.apply(this.arguments)},
+					function() {
+						component.run.apply(this.arguments)
+					},
 					["run","ready","template","dialog"]
 				);
 
@@ -148,4 +205,8 @@ var self = window[ns] = {
 	}
 };
 
+	self.component('EasyBlog', {});
+	self.component('EasySocial', {});
+	
 })("%BOOTCODE%");
+
