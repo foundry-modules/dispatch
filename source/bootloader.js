@@ -60,7 +60,7 @@ var self = window[ns] = {
 					foundryOptions[props[i]] = val;
 				}
 			});
-			
+
 			$.each(components, function(key, component) {
 				var meta = $('meta[name="%BOOTCODE%:' + key + '"]');
 
@@ -85,12 +85,12 @@ var self = window[ns] = {
 			});
 
 			// Only proceed to register the components when both foundry options and jquery is available.
-			if ($ && foundryOptions) { 
+			if ($ && foundryOptions) {
 				// Initialize jquery
-				self.$ = $.initialize(foundryOptions); 
+				self.$ = $.initialize(foundryOptions);
 
 				// Execute any pending plugins
-				self.plugin.execute(); 
+				self.plugin.execute();
 
 				// Get all abstract components
 				$.each(components, function(i, component){
@@ -215,7 +215,6 @@ var self = window[ns] = {
 };
 
 	self.component('EasyBlog', {});
-	self.component('EasySocial', {});
-	
+
 })("%BOOTCODE%");
 
