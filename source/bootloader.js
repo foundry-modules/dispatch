@@ -72,7 +72,7 @@ var self = window[ns] = {
 
 				// Here is where we neeed to update the component options
 				var value = meta.attr('content').split(',');
-				var props = ["mode", "version", "baseUrl", "cdn", "token"];
+				var props = ["mode", "version", "baseUrl", "cdn", "token", "ajaxUrl"];
 				var componentOptions = {};
 
 
